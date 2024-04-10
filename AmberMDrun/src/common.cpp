@@ -4,18 +4,21 @@
 #include "common.hpp"
 #include "fmt/format.h"
 
+#include "pybind11/pybind11.h"
+#include <atomic>
 #include <cstring>
 #include <filesystem>
 #include <optional>
+#include <signal.h>
 #include <sys/wait.h>
 #include <vector>
-
-
+namespace py = pybind11;
 std::vector<std::string> executeCMD(const std::string &strCmd)
 {
+
+    signal(SIGINT, signalHandler);
     char buf[1024] = {0};
     FILE *pf = nullptr;
-
     if ((pf = popen(strCmd.c_str(), "r")) == nullptr)
     {
         throw std::runtime_error(fmt::format("{} run failed!\n", strCmd));
@@ -44,8 +47,9 @@ std::vector<std::string> executeCMD(const std::string &strCmd)
 
     return result;
 }
+
 [[maybe_unused]] std::string executeCMD2(const std::vector<std::string> &args,
-                        const bool inc_stderr)
+                                         const bool inc_stderr)
 {
     int stdout_fds[2];
     pipe(stdout_fds);
@@ -125,4 +129,13 @@ std::vector<std::string> executeCMD(const std::string &strCmd)
     } while (r == -1 && errno == EINTR);
 
     return out;
+}
+void signalHandler(int signum)
+{
+    fmt::print("Interrupt signal{} received.\n", signum);
+    exit(signum);
+}
+void raiseHandler(int signum)
+{
+    raise(signum);
 }

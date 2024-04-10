@@ -28,4 +28,6 @@ inline void trim(std::string &s)
     s.erase(s.find_last_not_of(' ') + 1);
 }
 [[maybe_unused]] std::string executeCMD2(const std::vector<std::string>& args, const bool inc_stderr = false);
+void signalHandler(int signum);
+void raiseHandler(int signum);
 #endif//AMBERMD_COMMON_HPP

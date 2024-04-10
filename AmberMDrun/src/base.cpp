@@ -2,8 +2,10 @@
 // Created by jack on 2022/9/19.
 //
 #include "base.hpp"
+#include "common.hpp"
 #include "fmt/core.h"
 #include "fmt/os.h"
+#include <signal.h>
 #include <utility>
 #define f fmt::format
 Base::Base(const std::string &name, SystemInfo systemInfo, const std::string &rst7, const std::string &refc, bool irest,
@@ -27,6 +29,7 @@ void Base::writeInput()
 
 void Base::Run()
 {
+    signal(SIGINT, raiseHandler);
     if (this->done_ == true) this->done_ = false;
     writeInput();
     charmmWater();
@@ -157,7 +160,7 @@ void Base::progress()
     while (!this->done_)
     {
         fswatcher_event_handler handler = {[&](fswatcher_event_handler *handler, fswatcher_event_type evtype, const char *src, const char *dst) -> bool {
-            if (src =="./" + this->name_ + ".out")
+            if (src == "./" + this->name_ + ".out")
             {
                 (void) handler;
                 (void) dst;
